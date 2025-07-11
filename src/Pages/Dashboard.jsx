@@ -1,10 +1,4 @@
 import React, { useState } from 'react';
-import { 
-  Users, 
-  Package,
-  Gamepad2,
-  BookOpen
-} from 'lucide-react';
 import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
 import MetricsCard from '../Components/MetricsCard';
@@ -38,35 +32,35 @@ const Dashboard = () => {
     {
       title: 'Total User',
       value: '40,689',
-      icon: Users,
+      icon: '/assets/users.svg',
       bgColor: 'bg-blue-100',
       iconColor: 'text-blue-500'
     },
     {
       title: 'Subscriptions',
       value: '10293',
-      icon: Package,
+      icon: '/assets/subscriptions.svg',
       bgColor: 'bg-yellow-100',
       iconColor: 'text-yellow-500'
     },
     {
       title: 'Total Games',
       value: '20',
-      icon: Gamepad2,
+      icon: '/assets/games.svg',
       bgColor: 'bg-green-100',
       iconColor: 'text-green-500'
     },
     {
       title: 'Total Programs',
       value: '45',
-      icon: BookOpen,
+      icon: '/assets/programs.svg',
       bgColor: 'bg-orange-100',
       iconColor: 'text-orange-500'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F5F6FA] flex">
       {/* Sidebar */}
       <Sidebar 
         activeNav={activeNav} 
@@ -82,11 +76,12 @@ const Dashboard = () => {
           userName="Moni Roy"
           userRole="Admin"
           userInitials="MR"
+          profileImageUrl="/assets/profile.png"
         />
 
         {/* Dashboard Content */}
         <main className="flex-1 p-8 md:p-8 pt-16 md:pt-8">
-          <h1 className='text-2xl font-nunitoSansBold mb-4 text-primaryBlack'>Dashboard</h1>
+          <h1 className='text-3xl sm:text-4xl font-bold font-nunitoSansBold mb-4 text-primaryBlack'>Dashboard</h1>
           {/* Metrics Cards */}
           <MetricsCard metrics={metrics} />
 

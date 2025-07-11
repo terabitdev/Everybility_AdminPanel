@@ -23,19 +23,26 @@ const LoginPage = () => {
   };
 
   return (
-    <div 
+    <div
       className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: 'url("/assets/MainBg.png")' }}
     >
       <div className="bg-white rounded-2xl p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className=" font-nunitoSansBold font-bold  text-xl sm:text-3xl text-primaryBlack mb-2">Login to Account</h1>
-          <p className="text-primaryBlack text-base sm:text-[17px]  font-nunitoSansExtraLight">Please enter your email and password to continue</p>
+          <h1 className=" font-nunitoSansBold font-bold  text-xl sm:text-3xl text-primaryBlack mb-2">
+            Login to Account
+          </h1>
+          <p className="text-primaryBlack text-base sm:text-[17px]  font-nunitoSansExtraLight">
+            Please enter your email and password to continue
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-lg font-nunitoSansSemiBold  text-primaryBlack opacity-80 mb-1">
+            <label
+              htmlFor="email"
+              className="block text-lg font-nunitoSansSemiBold  text-primaryBlack opacity-80 mb-1"
+            >
               Email address
             </label>
             <input
@@ -51,10 +58,16 @@ const LoginPage = () => {
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label htmlFor="password" className="block text-lg font-nunitoSansSemiBold  text-primaryBlack opacity-80 ">
+              <label
+                htmlFor="password"
+                className="block text-lg font-nunitoSansSemiBold  text-primaryBlack opacity-80 "
+              >
                 Password
               </label>
-              <Link to="/forgot-password" className="text-base text-primaryBlack font-nunitoSansSemiBold opacity-60">
+              <Link
+                to="/forgot-password"
+                className="text-base text-primaryBlack font-nunitoSansSemiBold opacity-60"
+              >
                 Forget Password?
               </Link>
             </div>
@@ -78,21 +91,27 @@ const LoginPage = () => {
               onChange={handleChange}
               className="h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
             />
-            <label htmlFor="rememberMe" className="ml-2 text-sm text-primaryBlack">
+            <label
+              htmlFor="rememberMe"
+              className="ml-2 text-sm text-primaryBlack"
+            >
               Remember Password
             </label>
           </div>
-          
+
           <button
             type="submit"
             className="w-full bg-primaryBlue text-white py-3 rounded-lg font-medium "
           >
-            Sign In
+            <Link to="/">Sign In</Link>
           </button>
 
           <div className="text-center text-base font-nunitoSansRegular text-primaryBlack">
-            Don't have an account?{' '}
-            <Link to="/create-account" className="text-primaryBlue underline text-base font-nunitoSansSemiBold">
+            Don't have an account?{" "}
+            <Link
+              to="/create-account"
+              className="text-primaryBlue underline text-base font-nunitoSansSemiBold"
+            >
               Create Account
             </Link>
           </div>

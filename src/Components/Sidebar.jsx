@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Users, 
@@ -10,23 +11,86 @@ import {
 } from 'lucide-react';
 
 const Sidebar = ({ activeNav, setActiveNav, isOpen, setIsOpen }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const navigationItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, active: true },
-    { name: 'User Accounts', icon: Users, active: false },
-    { name: 'Subscriptions', icon: CreditCard, active: false },
+    { 
+      name: 'Dashboard', 
+      icon: LayoutDashboard, 
+      path: '/',
+      active: true 
+    },
+    { 
+      name: 'User Accounts', 
+      icon: Users, 
+      path: '/users',
+      active: false 
+    },
+    { 
+      name: 'Subscriptions', 
+      icon: CreditCard, 
+      path: '/subscriptions',
+      active: false 
+    },
   ];
 
   const bottomNavItems = [
-    { name: 'Settings', icon: Settings },
-    { name: 'Logout', icon: LogOut }
+    { 
+      name: 'Settings', 
+      icon: Settings, 
+      path: '/settings' 
+    },
+    { 
+      name: 'Logout', 
+      icon: LogOut, 
+      path: '/login' 
+    }
   ];
 
-  const handleNavClick = (navName) => {
+  const handleNavClick = (navName, path) => {
+    // Handle logout separately
+    if (navName === 'Logout') {
+      handleLogout();
+      return;
+    }
+
+    // Set active navigation
     setActiveNav(navName);
+    
+    // Navigate to the specified path
+    navigate(path);
+    
     // Close drawer on mobile when navigation item is clicked
     if (window.innerWidth < 768) {
       setIsOpen(false);
     }
+  };
+
+  const handleLogout = () => {
+    // Clear any stored authentication tokens
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    sessionStorage.clear();
+    
+    // Reset active navigation
+    setActiveNav('Dashboard');
+    
+    // Navigate to login page
+    navigate('/login');
+    
+    // Close mobile menu
+    if (window.innerWidth < 768) {
+      setIsOpen(false);
+    }
+    
+    // Optional: Show logout confirmation
+    console.log('User logged out successfully');
+  };
+
+  // Function to check if current path matches menu item
+  const isCurrentPath = (path) => {
+    return location.pathname === path;
   };
 
   return (
@@ -62,26 +126,25 @@ const Sidebar = ({ activeNav, setActiveNav, isOpen, setIsOpen }) => {
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-800">Admin Panel</h2>
-        </div>
         
         {/* Navigation Items */}
-        <nav className="flex-1 px-4">
+        <nav className="flex-1 px-4 pt-[4.5rem]">
           {navigationItems.map((item) => {
             const Icon = item.icon;
+            const isActive = isCurrentPath(item.path) || activeNav === item.name;
+            
             return (
               <button
                 key={item.name}
-                onClick={() => handleNavClick(item.name)}
+                onClick={() => handleNavClick(item.name, item.path)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
-                  activeNav === item.name
-                    ? 'bg-blue-500 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                  isActive
+                    ? 'bg-primaryBlue text-white'
+                    : 'text-primaryBlack hover:bg-gray-100'
                 }`}
               >
                 <Icon size={20} />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-nunitoSansSemiBold text-lg font-medium">{item.name}</span>
               </button>
             );
           })}
@@ -91,13 +154,20 @@ const Sidebar = ({ activeNav, setActiveNav, isOpen, setIsOpen }) => {
         <div className="p-4 border-t border-gray-200">
           {bottomNavItems.map((item) => {
             const Icon = item.icon;
+            const isActive = isCurrentPath(item.path) || activeNav === item.name;
+            
             return (
               <button
                 key={item.name}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 text-gray-600 hover:bg-gray-100 transition-colors"
+                onClick={() => handleNavClick(item.name, item.path)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg mb-2 transition-colors ${
+                  isActive
+                    ? 'bg-primaryBlue text-white'
+                    : 'text-primaryBlack hover:bg-gray-100'
+                } ${item.name === 'Logout' ? 'hover:bg-red-50 hover:text-red-600' : ''}`}
               >
                 <Icon size={20} />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-nunitoSansSemiBold text-lg font-medium">{item.name}</span>
               </button>
             );
           })}
@@ -107,4 +177,4 @@ const Sidebar = ({ activeNav, setActiveNav, isOpen, setIsOpen }) => {
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
