@@ -19,7 +19,7 @@ const DashboardGraph = ({ chartData, title = "Subscription Details" }) => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold font-NunitoSansBold text-primaryBlack">{title}</h2>
+        <h2 className="text-2xl font-bold font-nunitoSansBold text-primaryBlack">{title}</h2>
         <div className="relative">
           <select 
             value={selectedMonth}

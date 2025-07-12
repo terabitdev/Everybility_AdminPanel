@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Subscriptions = () => {
   const [activeNav, setActiveNav] = useState('Subscriptions');
@@ -37,11 +38,11 @@ const Subscriptions = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'Subscribed':
-        return 'bg-green-100 text-green-800';
+        return 'bg-[#16C09861] text-[#008767] border border-[#00B087]';
       case 'Processing':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-[#FFC5C5] text-[#DF0404] border border-[#DF0404]';
       case 'Cancelled':
-        return 'bg-red-100 text-red-800';
+        return 'bg-[#FFC5C5] text-[#DF0404] border border-[#DF0404]';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -69,68 +70,45 @@ const Subscriptions = () => {
 
         {/* Subscriptions Content */}
         <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
-          <h1 className='text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-gray-800'>Subscriptions</h1>
+          <h1 className='text-3xl sm:text-4xl  font-nunitoSansBold font-bold mb-4 text-primaryBlack'>Subscriptions</h1>
           
           {/* Subscription Management Section */}
-          <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+          <div className="bg-white rounded-[2rem] shadow-sm p-4 md:p-6">
             {/* Stats and Controls */}
             <div className="flex flex-col space-y-4 mb-6">
-            
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                <div className="flex flex-col mb-4 sm:ml-4">
+                </div>
+              </div>
               
               <div className="flex flex-col sm:flex-row gap-3">
-                {/* Search */}
-                <div className="relative flex-1 sm:max-w-xs">
-                  <input
-                    type="text"
-                    placeholder="Search subscriptions..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  />
-                  <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3.5 sm:top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                
-                {/* Sort Dropdown */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="Newest">Sort by: Newest</option>
-                  <option value="Oldest">Sort by: Oldest</option>
-                  <option value="Name">Sort by: Name</option>
-                  <option value="Status">Sort by: Status</option>
-                  <option value="Plan">Sort by: Plan</option>
-                </select>
               </div>
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden lg:block overflow-x-auto">
+            <div className="hidden lg:block overflow-x-auto font-poppinsMedium">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Email</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Date</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Plan</th>
+                  <tr className="border-b border-[#EEEEEE]">
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Name</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Email</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Date</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Plan</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSubscriptions.map((subscription) => (
-                    <tr key={subscription.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-4 px-4 text-gray-800">{subscription.name}</td>
-                      <td className="py-4 px-4 text-gray-600">{subscription.email}</td>
-                      <td className="py-4 px-4 text-gray-600">{subscription.date}</td>
+                    <tr key={subscription.id} className="border-b border-[#EEEEEE] hover:bg-gray-50">
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{subscription.name}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{subscription.email}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{subscription.date}</td>
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(subscription.status)}`}>
+                        <span className={`px-3 py-1 rounded-md text-sm font-medium ${getStatusColor(subscription.status)}`}>
                           {subscription.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-gray-600">{subscription.plan}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{subscription.plan}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -138,31 +116,31 @@ const Subscriptions = () => {
             </div>
 
             {/* Tablet View (md-lg) */}
-            <div className="hidden md:block lg:hidden overflow-x-auto">
+            <div className="hidden md:block lg:hidden overflow-x-auto font-poppinsMedium">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Plan</th>
+                  <tr className="border-b border-[#EEEEEE]">
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Name</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Plan</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredSubscriptions.map((subscription) => (
-                    <tr key={subscription.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <tr key={subscription.id} className="border-b border-[#EEEEEE] hover:bg-gray-50">
                       <td className="py-4 px-4">
                         <div>
-                          <div className="text-gray-800 font-medium">{subscription.name}</div>
-                          <div className="text-sm text-gray-500">{subscription.email}</div>
-                          <div className="text-xs text-gray-400">{subscription.date}</div>
+                          <div className="text-sm text-[#292D32] font-medium">{subscription.name}</div>
+                          <div className="text-sm text-[#292D32]">{subscription.email}</div>
+                          <div className="text-xs text-[#292D32]">{subscription.date}</div>
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(subscription.status)}`}>
+                        <span className={`px-3 py-1 rounded-md text-sm font-medium ${getStatusColor(subscription.status)}`}>
                           {subscription.status}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-gray-600">{subscription.plan}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{subscription.plan}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -193,17 +171,16 @@ const Subscriptions = () => {
 
             {/* Pagination */}
             <div className="flex flex-col lg:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 space-y-4 lg:space-y-0">
-              <div className="text-xs sm:text-sm text-gray-600 text-center lg:text-left">
-                Showing data 1 to {entriesPerPage} of {totalEntries} entries
+              <div className="text-xs sm:text-sm text-[#B5B7C0] font-poppinsMedium text-center lg:text-left">
               </div>
               
               <div className="flex items-center justify-center space-x-1 sm:space-x-2">
                 <button 
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 touch-manipulation"
+                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                 >
-                  ←
+                  <ChevronLeft className='w-4 h-4' />
                 </button>
                 
                 {[1, 2, 3].map((page) => (
@@ -212,8 +189,8 @@ const Subscriptions = () => {
                     onClick={() => setCurrentPage(page)}
                     className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded touch-manipulation ${
                       currentPage === page
-                        ? 'bg-blue-500 text-white'
-                        : 'text-gray-600 hover:text-gray-800'
+                        ? 'bg-[#4880FF] text-white'
+                        : 'bg-[#F5F5F5] border text-[#404B52] border-[#EEEEEE] rounded-lg'
                     }`}
                   >
                     {page}
@@ -224,7 +201,7 @@ const Subscriptions = () => {
                 
                 <button
                   onClick={() => setCurrentPage(17)}
-                  className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 touch-manipulation"
+                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm text-[#404B52]  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                 >
                   17
                 </button>
@@ -232,9 +209,9 @@ const Subscriptions = () => {
                 <button 
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 touch-manipulation"
+                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                 >
-                  →
+                  <ChevronRight className='w-4 h-4' />
                 </button>
               </div>
             </div>

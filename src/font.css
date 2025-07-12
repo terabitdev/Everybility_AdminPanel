@@ -70,7 +70,7 @@
 
 @font-face {
   font-display: swap;
-  font-style: bold;
+  font-style: normal;
   src: url("/fonts/NunitoSansBold.ttf");
   font-family: "NunitoSansBold";
   font-weight: 700;

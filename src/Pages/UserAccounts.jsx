@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
-
+import { ChevronLeft , ChevronRight } from 'lucide-react';
 const UserAccounts = () => {
   const [activeNav, setActiveNav] = useState('User Accounts');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('Newest');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Sort options array
+  const sortOptions = [
+    { value: 'Newest', label: 'Newest' },
+    { value: 'Oldest', label: 'Oldest' },
+    { value: 'Name', label: 'Name' },
+    { value: 'Email', label: 'Email' }
+  ];
 
   // Sample user data
   const userData = [
@@ -32,6 +42,25 @@ const UserAccounts = () => {
 
   const activeUsersCount = userData.filter(user => user.status === 'Active').length;
 
+  const handleSortChange = (value) => {
+    setSortBy(value);
+    setIsDropdownOpen(false);
+  };
+
+  // Handle clicking outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F5F6FA] flex">
       {/* Sidebar */}
@@ -54,16 +83,16 @@ const UserAccounts = () => {
 
         {/* User Accounts Content */}
         <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
-          <h1 className='text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-gray-800'>User Accounts</h1>
+          <h1 className='text-3xl sm:text-4xl  font-nunitoSansBold font-bold mb-4 text-primaryBlack'>User Accounts</h1>
           
           {/* User Management Section */}
-          <div className="bg-white rounded-lg shadow-sm p-4 md:p-6">
+          <div className="bg-white rounded-[2rem] shadow-sm p-4 md:p-6 ">
             {/* Header with All Users and Controls */}
-            <div className="flex flex-col space-y-4 mb-6">
+            <div className="flex flex-col sm:flex-row  sm:justify-between sm:items-center mb-6">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 mb-4 sm:mb-0">
+                <div className="flex flex-col mb-4 sm:ml-4">
                   <h2 className="text-lg md:text-xl font-semibold text-gray-800 mb-2 sm:mb-0">All Users</h2>
-                  <span className="text-sm text-green-600 font-medium">
+                  <span className="text-sm font-normal text-[#16C098] font-poppinsRegular">
                     Active Members: {activeUsersCount}
                   </span>
                 </div>
@@ -74,50 +103,76 @@ const UserAccounts = () => {
                 <div className="relative flex-1 sm:max-w-xs">
                   <input
                     type="text"
-                    placeholder="Search users..."
+                    placeholder="Search"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    className="w-full pl-10 pr-4 py-3 sm:py-2  bg-[#F9FBFF] placeholder:text-[#B5B7C0] placeholder:font-poppinsRegular  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                   />
-                  <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3.5 sm:top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-[#7E7E7E] absolute left-3 top-3.5 sm:top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
                 
-                {/* Sort Dropdown */}
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                >
-                  <option value="Newest">Sort by: Newest</option>
-                  <option value="Oldest">Sort by: Oldest</option>
-                  <option value="Name">Sort by: Name</option>
-                  <option value="Email">Sort by: Email</option>
-                </select>
+                {/* Custom Sort Dropdown */}
+                <div className="relative w-full sm:w-auto" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full sm:w-auto px-4 py-3 sm:py-2 bg-[#F9FBFF] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm flex items-center justify-between"
+                  >
+                    <span className='text-[#7E7E7E] font-poppinsRegular'>
+                      Sort by: <span className='text-[#3D3C42] font-poppinsSemiBold'>{sortBy}</span>
+                    </span>
+                    <svg 
+                      className={`w-4 h-4 ml-2 text-[#3D3C42] transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-1 w-full sm:w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          onClick={() => handleSortChange(option.value)}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
+                            sortBy === option.value 
+                              ? 'bg-blue-50 text-blue-600 font-poppinsSemiBold' 
+                              : 'text-[#7E7E7E] font-poppinsSemiBold'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
             {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
+            <div className="hidden md:block overflow-x-auto font-poppinsMedium ">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">User Name</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Email</th>
-                    <th className="text-left py-3 px-4 font-medium text-gray-600">Status</th>
+                  <tr className="border-b border-[#EEEEEE]">
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">User Name</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Email</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
-                    <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="py-4 px-4 text-gray-800">{user.name}</td>
-                      <td className="py-4 px-4 text-gray-600">{user.email}</td>
+                    <tr key={user.id} className="border-b border-[#EEEEEE] hover:bg-gray-50">
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{user.name}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{user.email}</td>
                       <td className="py-4 px-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        <span className={`px-3 py-1 rounded-md text-sm font-medium ${
                           user.status === 'Active' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-[#16C09861] text-[#008767] border border-[#00B087]' 
+                            : 'bg-[#FFC5C5] text-[#DF0404] border border-[#DF0404]'
                         }`}>
                           {user.status}
                         </span>
@@ -151,7 +206,7 @@ const UserAccounts = () => {
 
             {/* Pagination */}
             <div className="flex flex-col lg:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 space-y-4 lg:space-y-0">
-              <div className="text-xs sm:text-sm text-gray-600 text-center lg:text-left">
+              <div className="text-xs sm:text-sm text-[#B5B7C0] font-poppinsMedium text-center lg:text-left">
                 Showing data 1 to {entriesPerPage} of {totalEntries} entries
               </div>
               
@@ -159,9 +214,9 @@ const UserAccounts = () => {
                 <button 
                   onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
-                  className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 touch-manipulation"
+                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                 >
-                  ←
+                  <ChevronLeft className='w-4 h-4' />
                 </button>
                 
                 {/* Show fewer page numbers on mobile */}
@@ -171,8 +226,8 @@ const UserAccounts = () => {
                     onClick={() => setCurrentPage(page)}
                     className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded touch-manipulation ${
                       currentPage === page
-                        ? 'bg-blue-500 text-white'
-                        : 'text-gray-600 hover:text-gray-800'
+                        ? 'bg-[#4880FF] text-white'
+                        : 'bg-[#F5F5F5] border text-[#404B52] border-[#EEEEEE] rounded-lg'
                     }`}
                   >
                     {page}
@@ -183,7 +238,7 @@ const UserAccounts = () => {
                 
                 <button
                   onClick={() => setCurrentPage(17)}
-                  className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 touch-manipulation"
+                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm text-[#404B52]  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                 >
                   17
                 </button>
@@ -191,9 +246,9 @@ const UserAccounts = () => {
                 <button 
                   onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
-                  className="px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm text-gray-600 hover:text-gray-800 disabled:opacity-50 touch-manipulation"
+                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                 >
-                  →
+                  <ChevronRight className='w-4 h-4' />
                 </button>
               </div>
             </div>

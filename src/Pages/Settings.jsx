@@ -69,10 +69,10 @@ const Settings = () => {
 
         {/* Settings Content */}
         <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8 ">
-          <h1 className='text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-gray-800'>Settings</h1>
+          <h1 className='text-3xl sm:text-4xl  font-nunitoSansBold font-bold mb-4 text-primaryBlack'>Settings</h1>
           
           {/* Settings Form */}
-          <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-sm p-6 md:p-8 md:pb-8">
+          <div className="max-w-5xl mx-auto bg-white rounded-[2rem] shadow-sm p-6 md:p-8 md:pb-8">
             {/* Profile Image Section */}
             <div className="flex flex-col items-center mb-8">
               <div className="relative">
@@ -106,7 +106,7 @@ const Settings = () => {
             <div className="space-y-6">
               {/* Your Name Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-[16px]  text-[#232323] font-poppinsRegular mb-2">
                   Your Name
                 </label>
                 <input
@@ -115,13 +115,13 @@ const Settings = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="Christine David"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-colors duration-200"
+                  className="w-full px-4 py-3 border border-[#DFEAF2] font-poppinsRegular text-[#718EBF]  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 />
               </div>
 
               {/* Email Field */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-[16px]  text-[#232323] font-poppinsRegular mb-2">
                   Email
                 </label>
                 <input
@@ -130,7 +130,7 @@ const Settings = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="christinedavid@gmail.com"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 transition-colors duration-200"
+                  className="w-full px-4 py-3 border border-[#DFEAF2] font-poppinsRegular text-[#718EBF]  rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500  transition-colors duration-200"
                 />
               </div>
 
@@ -142,7 +142,7 @@ const Settings = () => {
               <button
                 onClick={handleSave}
                 disabled={isLoading}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="w-full bg-[#4880FF] disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">

@@ -81,7 +81,7 @@ const Dashboard = () => {
 
         {/* Dashboard Content */}
         <main className="flex-1 p-8 md:p-8 pt-16 md:pt-8">
-          <h1 className='text-3xl sm:text-4xl font-bold font-nunitoSansBold mb-4 text-primaryBlack'>Dashboard</h1>
+          <h1 className='text-3xl sm:text-4xl  font-nunitoSansBold font-bold mb-4 text-primaryBlack'>Dashboard</h1>
           {/* Metrics Cards */}
           <MetricsCard metrics={metrics} />
 

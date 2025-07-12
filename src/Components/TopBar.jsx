@@ -17,7 +17,7 @@ const TopBar = ({ userName, userRole, userInitials, profileImageUrl }) => {
           )}
         </div>
         <div>
-          <p className="font-NunitoSansBold font-bold  text-[#404040]">{userName}</p>
+          <p className="font-nunitoSansBold font-bold  text-[#404040]">{userName}</p>
           <p className="text-xs text-[#565656] font-nunitoSansSemiBold font-semibold">{userRole}</p>
         </div>
       </div>
