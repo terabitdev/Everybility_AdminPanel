@@ -8,7 +8,7 @@ const DashboardGraph = ({ chartData, title = "Subscription Details" }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-blue-500 text-white px-3 py-2 rounded-lg shadow-lg">
+        <div className="bg-primaryBlue text-white px-3 py-2 rounded-lg shadow-lg">
           <p className="font-semibold">{`64,3664.77`}</p>
         </div>
       );
@@ -26,6 +26,15 @@ const DashboardGraph = ({ chartData, title = "Subscription Details" }) => {
             onChange={(e) => setSelectedMonth(e.target.value)}
             className="appearance-none bg-secondaryGray opacity-40 border border-primaryGray rounded-lg px-4 py-2 pr-8 text-base font-NunitoSansRegular"
           >
+            <option>January</option>
+            <option>February</option>
+            <option>March</option>
+            <option>April</option>
+            <option>May</option>
+            <option>June</option>
+            <option>July</option>
+            <option>August</option>
+            <option>September</option>
             <option>October</option>
             <option>November</option>
             <option>December</option>
