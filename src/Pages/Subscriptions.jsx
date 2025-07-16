@@ -61,12 +61,7 @@ const Subscriptions = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col md:ml-0">
         {/* Header */}
-        <TopBar 
-          userName="Moni Roy"
-          userRole="Admin"
-          userInitials="MR"
-          profileImageUrl="/assets/profile.png"
-        />
+        <TopBar />
 
         {/* Subscriptions Content */}
         <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">

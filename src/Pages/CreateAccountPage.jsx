@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const CreateAccountPage = () => {
   const [formData, setFormData] = useState({
@@ -7,6 +8,11 @@ const CreateAccountPage = () => {
     email: '',
     password: ''
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -16,10 +22,43 @@ const CreateAccountPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log('Form submitted:', formData);
+    
+    if (formData.password.length < 6) {
+      return setError('Password must be at least 6 characters long');
+    }
+
+    try {
+      setError('');
+      setSuccess('');
+      setLoading(true);
+      
+      console.log('Starting signup process...');
+      await signup(formData.email, formData.password, formData.fullName);
+      
+      setSuccess('Account created successfully! Redirecting to dashboard...');
+      console.log('Signup completed successfully');
+      
+      // Wait a moment to show success message
+      setTimeout(() => {
+        navigate('/');
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Signup error:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists.');
+      } else if (error.code === 'auth/invalid-email') {
+        setError('Please enter a valid email address.');
+      } else if (error.code === 'auth/weak-password') {
+        setError('Password is too weak. Please choose a stronger password.');
+      } else {
+        setError('Failed to create an account. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -32,6 +71,18 @@ const CreateAccountPage = () => {
           <h1 className="font-nunitoSansBold font-bold text-xl sm:text-3xl text-primaryBlack mb-2">Create new account</h1>
           <p className="text-primaryBlack text-base sm:text-[17px] font-nunitoSansExtraLight">Please fill the following information to sign up</p>
         </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
+        {success && (
+          <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+            {success}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -46,6 +97,7 @@ const CreateAccountPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-[#F1F4F9] border border-secondaryGray focus:outline-none focus:border-blue-500"
               placeholder="Muhammad Owais"
+              required
             />
           </div>
 
@@ -61,6 +113,7 @@ const CreateAccountPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-[#F1F4F9] border border-secondaryGray focus:outline-none focus:border-blue-500"
               placeholder="sample_useremail@gmail.com"
+              required
             />
           </div>
 
@@ -76,14 +129,18 @@ const CreateAccountPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-[#F1F4F9] border placeholder:text-primaryGray border-secondaryGray focus:outline-none focus:border-blue-500"
               placeholder="• • • • • •"
+              required
+              minLength={6}
             />
+            <p className="text-sm text-gray-500 mt-1">Password must be at least 6 characters long</p>
           </div>
           
           <button
             type="submit"
-            className="w-full bg-primaryBlue text-white py-3 rounded-lg font-medium"
+            disabled={loading}
+            className="w-full bg-primaryBlue text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Sign Up
+            {loading ? 'Creating Account...' : 'Sign Up'}
           </button>
 
           <div className="text-center text-base font-nunitoSansRegular text-primaryBlack">

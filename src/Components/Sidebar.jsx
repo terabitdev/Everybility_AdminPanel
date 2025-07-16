@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import { 
   LayoutDashboard, 
   Users, 
@@ -13,6 +14,7 @@ import {
 const Sidebar = ({ activeNav, setActiveNav, isOpen, setIsOpen }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
   const navigationItems = [
     { 
@@ -67,25 +69,24 @@ const Sidebar = ({ activeNav, setActiveNav, isOpen, setIsOpen }) => {
     }
   };
 
-  const handleLogout = () => {
-    // Clear any stored authentication tokens
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    sessionStorage.clear();
-    
-    // Reset active navigation
-    setActiveNav('Dashboard');
-    
-    // Navigate to login page
-    navigate('/login');
-    
-    // Close mobile menu
-    if (window.innerWidth < 768) {
-      setIsOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      // Reset active navigation
+      setActiveNav('Dashboard');
+      
+      // Navigate to login page
+      navigate('/login');
+      
+      // Close mobile menu
+      if (window.innerWidth < 768) {
+        setIsOpen(false);
+      }
+      
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Logout error:', error);
     }
-    
-    // Optional: Show logout confirmation
-    console.log('User logged out successfully');
   };
 
   // Function to check if current path matches menu item

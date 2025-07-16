@@ -6,32 +6,34 @@ import UserAccounts from "./Pages/UserAccounts";
 import Subscriptions from "./Pages/Subscriptions";
 import Settings from "./Pages/Settings";
 import CreateAccountPage from "./Pages/CreateAccountPage";
+import PrivateRoute from "./Components/PrivateRoute";
+import PublicRoute from "./Components/PublicRoute";
 
 const ProjectRoutes = () => {
     let element = useRoutes([
         { 
             path: "/login", 
-            element: <LoginPage />
+            element: <PublicRoute><LoginPage /></PublicRoute>
         },
         { 
             path: "/create-account", 
-            element: <CreateAccountPage />
+            element: <PublicRoute><CreateAccountPage /></PublicRoute>
         },
         { 
             path: "/", 
-            element: <Dashboard />
+            element: <PrivateRoute><Dashboard /></PrivateRoute>
         },
         { 
             path: "/users", 
-            element: <UserAccounts />
+            element: <PrivateRoute><UserAccounts /></PrivateRoute>
         },
         { 
             path: "/subscriptions", 
-            element: <Subscriptions />
+            element: <PrivateRoute><Subscriptions /></PrivateRoute>
         },
         { 
             path: "/settings", 
-            element: <Settings />
+            element: <PrivateRoute><Settings /></PrivateRoute>
         },
         { 
             path: "*", 

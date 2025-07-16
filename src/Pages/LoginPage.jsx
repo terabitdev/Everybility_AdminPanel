@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -7,6 +8,10 @@ const LoginPage = () => {
     password: '',
     rememberMe: false
   });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -16,10 +21,20 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log('Form submitted:', formData);
+    
+    try {
+      setError('');
+      setLoading(true);
+      await login(formData.email, formData.password);
+      navigate('/');
+    } catch (error) {
+      setError('Failed to sign in. Please check your email and password.');
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -37,6 +52,12 @@ const LoginPage = () => {
           </p>
         </div>
 
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label
@@ -53,6 +74,7 @@ const LoginPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-[#F1F4F9]  border border-secondaryGray focus:outline-none focus:border-blue-500"
               placeholder="example_schiller@gmail.com"
+              required
             />
           </div>
 
@@ -79,6 +101,7 @@ const LoginPage = () => {
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-lg bg-[#F1F4F9] border placeholder:text-primaryGray border-secondaryGray focus:outline-none focus:border-blue-500"
               placeholder="• • • • • • •"
+              required
             />
           </div>
 
@@ -101,9 +124,10 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-primaryBlue text-white py-3 rounded-lg font-medium "
+            disabled={loading}
+            className="w-full bg-primaryBlue text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Link to="/">Sign In</Link>
+            {loading ? 'Signing In...' : 'Sign In'}
           </button>
 
           <div className="text-center text-base font-nunitoSansRegular text-primaryBlack">

@@ -72,12 +72,7 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col md:ml-0">
         {/* Header */}
-        <TopBar 
-          userName="Moni Roy"
-          userRole="Admin"
-          userInitials="MR"
-          profileImageUrl="/assets/profile.png"
-        />
+        <TopBar />
 
         {/* Dashboard Content */}
         <main className="flex-1 p-8 md:p-8 pt-16 md:pt-8">

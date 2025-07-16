@@ -1,53 +1,78 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
-import { ChevronLeft , ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { getAllUsers } from '../services/userService';
+
 const UserAccounts = () => {
   const [activeNav, setActiveNav] = useState('User Accounts');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('Newest');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState('Name');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState('');
 
-  // Sort options array
-  const sortOptions = [
-    { value: 'Newest', label: 'Newest' },
-    { value: 'Oldest', label: 'Oldest' },
-    { value: 'Name', label: 'Name' },
-    { value: 'Email', label: 'Email' }
-  ];
-
-  // Sample user data
-  const userData = [
-    { id: 1, name: 'Jane Cooper', email: 'jane@microsoft.com', status: 'Active' },
-    { id: 2, name: 'Floyd Miles', email: 'floyd@yahoo.com', status: 'Inactive' },
-    { id: 3, name: 'Ronald Richards', email: 'ronald@adobe.com', status: 'Inactive' },
-    { id: 4, name: 'Marvin McKinney', email: 'marvin@tesla.com', status: 'Active' },
-    { id: 5, name: 'Jerome Bell', email: 'jerome@google.com', status: 'Active' },
-    { id: 6, name: 'Kathryn Murphy', email: 'kathryn@microsoft.com', status: 'Active' },
-    { id: 7, name: 'Jacob Jones', email: 'jacob@yahoo.com', status: 'Active' },
-    { id: 8, name: 'Kristin Watson', email: 'kristin@facebook.com', status: 'Inactive' }
-  ];
-
-  const totalEntries = 1256;
-  const entriesPerPage = 8;
+  const entriesPerPage = 10;
+  const totalEntries = users.length;
   const totalPages = Math.ceil(totalEntries / entriesPerPage);
 
-  const filteredUsers = userData.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch users from Firestore
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const usersData = await getAllUsers();
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+        setError('Failed to load users. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const activeUsersCount = userData.filter(user => user.status === 'Active').length;
+    fetchUsers();
+  }, []);
+
+  const sortOptions = [
+    { value: 'Name', label: 'Name' },
+    { value: 'Email', label: 'Email' },
+    { value: 'Status', label: 'Status' },
+    { value: 'Date', label: 'Date Created' }
+  ];
 
   const handleSortChange = (value) => {
     setSortBy(value);
     setIsDropdownOpen(false);
   };
 
-  // Handle clicking outside dropdown
+  // Filter and sort users
+  const filteredUsers = users
+    .filter(user => 
+      user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'Name':
+          return (a.fullName || '').localeCompare(b.fullName || '');
+        case 'Email':
+          return (a.email || '').localeCompare(b.email || '');
+        case 'Status':
+          return (a.status || '').localeCompare(b.status || '');
+        case 'Date':
+          return new Date(b.createdAt?.toDate?.() || b.createdAt) - new Date(a.createdAt?.toDate?.() || a.createdAt);
+        default:
+          return 0;
+      }
+    });
+
+  const activeUsersCount = filteredUsers.filter(user => user.status === 'active').length;
+
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -60,6 +85,29 @@ const UserAccounts = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  const dropdownRef = React.useRef();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#F5F6FA] flex">
+        <Sidebar 
+          activeNav={activeNav} 
+          setActiveNav={setActiveNav}
+          isOpen={isSidebarOpen}
+          setIsOpen={setIsSidebarOpen}
+        />
+        <div className="flex-1 flex flex-col md:ml-0">
+          <TopBar />
+          <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primaryBlue"></div>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F6FA] flex">
@@ -74,16 +122,17 @@ const UserAccounts = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col md:ml-0">
         {/* Header */}
-        <TopBar 
-          userName="Moni Roy"
-          userRole="Admin"
-          userInitials="MR"
-          profileImageUrl="/assets/profile.png"
-        />
+        <TopBar />
 
         {/* User Accounts Content */}
         <main className="flex-1 p-4 md:p-8 pt-16 md:pt-8">
           <h1 className='text-3xl sm:text-4xl  font-nunitoSansBold font-bold mb-4 text-primaryBlack'>User Accounts</h1>
+          
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
           
           {/* User Management Section */}
           <div className="bg-white rounded-[2rem] shadow-sm p-4 md:p-6 ">
@@ -161,21 +210,30 @@ const UserAccounts = () => {
                     <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">User Name</th>
                     <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Email</th>
                     <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Status</th>
+                    <th className="text-left py-3 px-4 font-medium text-[#B5B7C0]">Date Created</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredUsers.map((user) => (
                     <tr key={user.id} className="border-b border-[#EEEEEE] hover:bg-gray-50">
-                      <td className="py-4 px-4 text-sm text-[#292D32]">{user.name}</td>
-                      <td className="py-4 px-4 text-sm text-[#292D32]">{user.email}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{user.fullName || 'N/A'}</td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">{user.email || 'N/A'}</td>
                       <td className="py-4 px-4">
                         <span className={`px-3 py-1 rounded-md text-sm font-medium ${
-                          user.status === 'Active' 
+                          user.status === 'active' 
                             ? 'bg-[#16C09861] text-[#008767] border border-[#00B087]' 
                             : 'bg-[#FFC5C5] text-[#DF0404] border border-[#DF0404]'
                         }`}>
-                          {user.status}
+                          {user.status || 'inactive'}
                         </span>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-[#292D32]">
+                        {user.createdAt?.toDate?.() 
+                          ? user.createdAt.toDate().toLocaleDateString()
+                          : user.createdAt instanceof Date 
+                            ? user.createdAt.toLocaleDateString()
+                            : 'N/A'
+                        }
                       </td>
                     </tr>
                   ))}
@@ -189,69 +247,85 @@ const UserAccounts = () => {
                 <div key={user.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 text-base">{user.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1 break-all">{user.email}</p>
+                      <h3 className="font-semibold text-gray-800 text-base">{user.fullName || 'N/A'}</h3>
+                      <p className="text-sm text-gray-600 mt-1 break-all">{user.email || 'N/A'}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Created: {user.createdAt?.toDate?.() 
+                          ? user.createdAt.toDate().toLocaleDateString()
+                          : user.createdAt instanceof Date 
+                            ? user.createdAt.toLocaleDateString()
+                            : 'N/A'
+                        }
+                      </p>
                     </div>
                     <span className={`ml-3 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                      user.status === 'Active' 
+                      user.status === 'active' 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {user.status}
+                      {user.status || 'inactive'}
                     </span>
                   </div>
                 </div>
               ))}
             </div>
 
+            {filteredUsers.length === 0 && (
+              <div className="text-center py-8 text-gray-500">
+                {searchTerm ? 'No users found matching your search.' : 'No users found.'}
+              </div>
+            )}
+
             {/* Pagination */}
-            <div className="flex flex-col lg:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 space-y-4 lg:space-y-0">
-              <div className="text-xs sm:text-sm text-[#B5B7C0] font-poppinsMedium text-center lg:text-left">
-                Showing data 1 to {entriesPerPage} of {totalEntries} entries
-              </div>
-              
-              <div className="flex items-center justify-center space-x-1 sm:space-x-2">
-                <button 
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
-                >
-                  <ChevronLeft className='w-4 h-4' />
-                </button>
+            {filteredUsers.length > 0 && (
+              <div className="flex flex-col lg:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 space-y-4 lg:space-y-0">
+                <div className="text-xs sm:text-sm text-[#B5B7C0] font-poppinsMedium text-center lg:text-left">
+                  Showing data 1 to {Math.min(entriesPerPage, filteredUsers.length)} of {totalEntries} entries
+                </div>
                 
-                {/* Show fewer page numbers on mobile */}
-                {[1, 2, 3].map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded touch-manipulation ${
-                      currentPage === page
-                        ? 'bg-[#4880FF] text-white'
-                        : 'bg-[#F5F5F5] border text-[#404B52] border-[#EEEEEE] rounded-lg'
-                    }`}
+                <div className="flex items-center justify-center space-x-1 sm:space-x-2">
+                  <button 
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    disabled={currentPage === 1}
+                    className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
                   >
-                    {page}
+                    <ChevronLeft className='w-4 h-4' />
                   </button>
-                ))}
-                
-                <span className="px-1 sm:px-2 text-gray-400 text-xs sm:text-sm">...</span>
-                
-                <button
-                  onClick={() => setCurrentPage(17)}
-                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm text-[#404B52]  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
-                >
-                  17
-                </button>
-                
-                <button 
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
-                >
-                  <ChevronRight className='w-4 h-4' />
-                </button>
+                  
+                  {/* Show fewer page numbers on mobile */}
+                  {[1, 2, 3].map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-2 sm:px-3 py-1 sm:py-2 text-xs sm:text-sm rounded touch-manipulation ${
+                        currentPage === page
+                          ? 'bg-[#4880FF] text-white'
+                          : 'bg-[#F5F5F5] border text-[#404B52] border-[#EEEEEE] rounded-lg'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  
+                  <span className="px-1 sm:px-2 text-gray-400 text-xs sm:text-sm">...</span>
+                  
+                  <button
+                    onClick={() => setCurrentPage(17)}
+                    className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm text-[#404B52]  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
+                  >
+                    17
+                  </button>
+                  
+                  <button 
+                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-2 sm:px-2 py-1 sm:py-2 text-xs sm:text-sm  bg-[#F5F5F5] border border-[#EEEEEE] rounded-lg touch-manipulation"
+                  >
+                    <ChevronRight className='w-4 h-4' />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </main>
       </div>
