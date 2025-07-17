@@ -3,6 +3,7 @@ import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
 import { useAuth } from '../hooks/useAuth';
 import { updateUserData, getUserData, uploadProfileImage } from '../services/userService';
+import { sendEmailVerificationToNewEmail } from '../services/emailVerificationService';
 import { updateProfile, updateEmail, EmailAuthProvider, reauthenticateWithCredential, sendEmailVerification } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -23,6 +24,7 @@ const Settings = () => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
   const [pendingEmailUpdate, setPendingEmailUpdate] = useState(null);
+  const [showResendButton, setShowResendButton] = useState(false);
   const { currentUser } = useAuth();
 
   // Load user data on component mount
@@ -111,36 +113,32 @@ const Settings = () => {
       const credential = EmailAuthProvider.credential(originalEmail, password);
       await reauthenticateWithCredential(currentUser, credential);
 
-      // First, send a verification email to the current user's email
-      // This ensures the current email is verified before we try to change it
-      if (!currentUser.emailVerified) {
-        await sendEmailVerification(currentUser, {
-          url: window.location.origin + '/settings',
-          handleCodeInApp: false
-        });
-        setSuccess(`Please verify your current email (${originalEmail}) first. A verification email has been sent. Once verified, you can update to the new email.`);
-        setPassword('');
-        setShowPasswordModal(false);
-        return;
-      }
-
-      // If current email is verified, we can proceed with the email change
-      // However, Firebase requires the new email to be verified before changing
-      // So we'll store the pending email and guide the user
+      // Store the pending email change in Firestore first
       const updatedUserData = {
         fullName: formData.name,
         displayName: formData.name,
         email: originalEmail, // Keep current email for now
         pendingEmail: pendingEmailUpdate, // Store pending email
+        pendingEmailTimestamp: new Date().toISOString(), // Track when request was made
         profileImage: profileImage,
         updatedAt: new Date()
       };
 
       await updateUserData(currentUser.uid, updatedUserData);
 
-      setSuccess(`Email change request submitted. To complete the process, please verify your new email (${pendingEmailUpdate}) by checking your inbox and following the verification instructions.`);
+      // Send verification email directly to the new email address
+      await sendEmailVerificationToNewEmail(pendingEmailUpdate, currentUser.uid);
+
+      // For Gmail users, provide specific instructions
+      const isGmail = pendingEmailUpdate.toLowerCase().includes('@gmail.com');
+      const emailInstructions = isGmail 
+        ? `Email verification request submitted for ${pendingEmailUpdate}. For Gmail users: Check your spam folder, promotions tab, or wait 5-10 minutes. Click the verification link to update your email.`
+        : `Email verification request submitted for ${pendingEmailUpdate}. Please check your inbox and spam folder. Click the verification link to update your email.`;
+
+      setSuccess(emailInstructions);
       setPassword('');
       setShowPasswordModal(false);
+      setShowResendButton(true);
       
     } catch (error) {
       console.error('Error updating email:', error);
@@ -150,10 +148,35 @@ const Settings = () => {
         setError('This email is already in use by another account.');
       } else if (error.code === 'auth/requires-recent-login') {
         setError('Please log out and log back in to update your email.');
-      } else if (error.code === 'auth/operation-not-allowed') {
-        setError('Email verification is required. Please check your email and verify the new email address.');
+      } else if (error.code === 'auth/too-many-requests') {
+        setError('Too many email requests. Please wait a few minutes before trying again.');
       } else {
         setError('Error updating email. Please try again.');
+      }
+    } finally {
+      setIsEmailVerificationLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!currentUser) return;
+
+    setIsEmailVerificationLoading(true);
+    setError('');
+
+    try {
+      await sendEmailVerification(currentUser, {
+        url: window.location.origin + '/settings',
+        handleCodeInApp: false
+      });
+
+      setSuccess('Verification email resent successfully! Please check your inbox and spam folder.');
+    } catch (error) {
+      console.error('Error resending verification email:', error);
+      if (error.code === 'auth/too-many-requests') {
+        setError('Too many email requests. Please wait a few minutes before trying again.');
+      } else {
+        setError('Failed to resend verification email. Please try again.');
       }
     } finally {
       setIsEmailVerificationLoading(false);
@@ -276,6 +299,17 @@ const Settings = () => {
             {success && (
               <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
                 {success}
+                {showResendButton && (
+                  <div className="mt-3">
+                    <button
+                      onClick={handleResendVerification}
+                      disabled={isEmailVerificationLoading}
+                      className="text-sm bg-blue-500 hover:bg-blue-600 disabled:bg-blue-400 text-white px-3 py-1 rounded transition-colors duration-200"
+                    >
+                      {isEmailVerificationLoading ? 'Resending...' : 'Resend Verification Email'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -373,6 +407,7 @@ const Settings = () => {
                   setShowPasswordModal(false);
                   setPassword('');
                   setPendingEmailUpdate(null);
+                  setShowResendButton(false);
                   setFormData(prev => ({ ...prev, email: originalEmail }));
                 }}
                 className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"

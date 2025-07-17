@@ -7,6 +7,7 @@ import Subscriptions from "./Pages/Subscriptions";
 import Settings from "./Pages/Settings";
 import CreateAccountPage from "./Pages/CreateAccountPage";
 import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
+import EmailVerificationPage from "./Pages/EmailVerificationPage";
 import PrivateRoute from "./Components/PrivateRoute";
 import PublicRoute from "./Components/PublicRoute";
 
@@ -23,6 +24,10 @@ const ProjectRoutes = () => {
         { 
             path: "/forgot-password", 
             element: <PublicRoute><ForgotPasswordPage /></PublicRoute>
+        },
+        { 
+            path: "/verify-email", 
+            element: <EmailVerificationPage />
         },
         { 
             path: "/", 
