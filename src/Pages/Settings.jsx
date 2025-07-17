@@ -17,6 +17,7 @@ const Settings = () => {
   const [profileImage, setProfileImage] = useState('/assets/profile.png');
   const [profileImageFile, setProfileImageFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailVerificationLoading, setIsEmailVerificationLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
@@ -102,32 +103,44 @@ const Settings = () => {
       return;
     }
 
+    setIsEmailVerificationLoading(true);
+    setError('');
+
     try {
-      // Re-authenticate user
+      // Re-authenticate user first
       const credential = EmailAuthProvider.credential(originalEmail, password);
       await reauthenticateWithCredential(currentUser, credential);
 
-      // Send verification email to the new email address
-      await sendEmailVerification(currentUser, {
-        url: window.location.origin + '/settings',
-        handleCodeInApp: false
-      });
+      // First, send a verification email to the current user's email
+      // This ensures the current email is verified before we try to change it
+      if (!currentUser.emailVerified) {
+        await sendEmailVerification(currentUser, {
+          url: window.location.origin + '/settings',
+          handleCodeInApp: false
+        });
+        setSuccess(`Please verify your current email (${originalEmail}) first. A verification email has been sent. Once verified, you can update to the new email.`);
+        setPassword('');
+        setShowPasswordModal(false);
+        return;
+      }
 
-      setSuccess(`Verification email sent to ${pendingEmailUpdate}. Please check your email and click the verification link before the email will be updated.`);
-      setPassword('');
-      setShowPasswordModal(false);
-      
-      // Note: The email will be updated automatically when the user clicks the verification link
-      // For now, we'll just update Firestore with the new email
+      // If current email is verified, we can proceed with the email change
+      // However, Firebase requires the new email to be verified before changing
+      // So we'll store the pending email and guide the user
       const updatedUserData = {
         fullName: formData.name,
         displayName: formData.name,
-        email: pendingEmailUpdate,
+        email: originalEmail, // Keep current email for now
+        pendingEmail: pendingEmailUpdate, // Store pending email
         profileImage: profileImage,
         updatedAt: new Date()
       };
 
       await updateUserData(currentUser.uid, updatedUserData);
+
+      setSuccess(`Email change request submitted. To complete the process, please verify your new email (${pendingEmailUpdate}) by checking your inbox and following the verification instructions.`);
+      setPassword('');
+      setShowPasswordModal(false);
       
     } catch (error) {
       console.error('Error updating email:', error);
@@ -135,11 +148,15 @@ const Settings = () => {
         setError('Incorrect password. Please try again.');
       } else if (error.code === 'auth/email-already-in-use') {
         setError('This email is already in use by another account.');
+      } else if (error.code === 'auth/requires-recent-login') {
+        setError('Please log out and log back in to update your email.');
       } else if (error.code === 'auth/operation-not-allowed') {
         setError('Email verification is required. Please check your email and verify the new email address.');
       } else {
         setError('Error updating email. Please try again.');
       }
+    } finally {
+      setIsEmailVerificationLoading(false);
     }
   };
 
@@ -364,9 +381,20 @@ const Settings = () => {
               </button>
               <button
                 onClick={handleEmailUpdate}
-                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                disabled={isEmailVerificationLoading}
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
-                Send Verification Email
+                {isEmailVerificationLoading ? (
+                  <div className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Sending...
+                  </div>
+                ) : (
+                  'Send Verification Email'
+                )}
               </button>
             </div>
           </div>
