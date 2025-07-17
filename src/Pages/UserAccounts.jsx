@@ -54,10 +54,30 @@ const UserAccounts = () => {
   const filteredUsers = useMemo(() => {
     console.log('Recomputing filtered users. Sort by:', sortBy);
     
-    const filtered = users.filter(user => 
-      user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filtered = users.filter(user => {
+      const searchLower = searchTerm.toLowerCase();
+      
+      // Search by name
+      const nameMatch = user.fullName?.toLowerCase().includes(searchLower);
+      
+      // Search by email
+      const emailMatch = user.email?.toLowerCase().includes(searchLower);
+      
+      // Search by status
+      const statusMatch = (user.status || 'inactive').toLowerCase().includes(searchLower);
+      
+      // Search by date (format: MM/DD/YYYY or DD/MM/YYYY)
+      let dateMatch = false;
+      if (searchTerm.trim()) {
+        const userDate = user.createdAt?.toDate?.() || user.createdAt;
+        if (userDate) {
+          const dateString = userDate.toLocaleDateString();
+          dateMatch = dateString.includes(searchTerm);
+        }
+      }
+      
+      return nameMatch || emailMatch || statusMatch || dateMatch;
+    });
     
     return filtered.sort((a, b) => {
       switch (sortBy) {
