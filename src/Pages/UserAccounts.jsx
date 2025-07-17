@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -45,30 +45,39 @@ const UserAccounts = () => {
   ];
 
   const handleSortChange = (value) => {
+    console.log('Sorting changed to:', value);
     setSortBy(value);
     setIsDropdownOpen(false);
   };
 
-  // Filter and sort users
-  const filteredUsers = users
-    .filter(user => 
+  // Filter and sort users using useMemo for better performance
+  const filteredUsers = useMemo(() => {
+    console.log('Recomputing filtered users. Sort by:', sortBy);
+    
+    const filtered = users.filter(user => 
       user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .sort((a, b) => {
+    );
+    
+    return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'Name':
           return (a.fullName || '').localeCompare(b.fullName || '');
         case 'Email':
           return (a.email || '').localeCompare(b.email || '');
         case 'Status':
-          return (a.status || '').localeCompare(b.status || '');
+          const statusA = a.status || 'inactive';
+          const statusB = b.status || 'inactive';
+          return statusA.localeCompare(statusB);
         case 'Date':
-          return new Date(b.createdAt?.toDate?.() || b.createdAt) - new Date(a.createdAt?.toDate?.() || a.createdAt);
+          const dateA = a.createdAt?.toDate?.() || a.createdAt || new Date(0);
+          const dateB = b.createdAt?.toDate?.() || b.createdAt || new Date(0);
+          return new Date(dateB) - new Date(dateA);
         default:
           return 0;
       }
     });
+  }, [users, searchTerm, sortBy]);
 
   const activeUsersCount = filteredUsers.filter(user => user.status === 'active').length;
 
