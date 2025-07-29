@@ -3,6 +3,7 @@ import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAllUsers } from '../services/userService';
+import { useAuth } from '../contexts/AuthContext';
 
 const UserAccounts = () => {
   const [activeNav, setActiveNav] = useState('User Accounts');
@@ -14,6 +15,7 @@ const UserAccounts = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState('');
+  const { currentUser } = useAuth();
 
   const entriesPerPage = 10;
   const totalEntries = users.length;
@@ -22,10 +24,14 @@ const UserAccounts = () => {
   // Fetch users from Firestore
   useEffect(() => {
     const fetchUsers = async () => {
+      if (!currentUser) return;
+      
       try {
         setLoading(true);
         const usersData = await getAllUsers();
-        setUsers(usersData);
+        // Filter out the current admin from the users list
+        const filteredUsers = usersData.filter(user => user.id !== currentUser.uid);
+        setUsers(filteredUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
         setError('Failed to load users. Please try again.');
@@ -35,7 +41,7 @@ const UserAccounts = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [currentUser]);
 
   const sortOptions = [
     { value: 'Name', label: 'Name' },

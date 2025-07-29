@@ -1,12 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../Components/Sidebar';
 import TopBar from '../Components/TopBar';
 import MetricsCard from '../Components/MetricsCard';
 import DashboardGraph from '../Components/DashboardGraph';
+import { getDashboardMetrics } from '../services/userService';
+import { useAuth } from '../contexts/AuthContext';
+import LoadingSpinner from '../Components/LoadingSpinner';
 
 const Dashboard = () => {
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [metrics, setMetrics] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { currentUser } = useAuth();
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      if (!currentUser) return;
+      
+      try {
+        setLoading(true);
+        const metricsData = await getDashboardMetrics(currentUser.uid);
+        setMetrics(metricsData);
+      } catch (error) {
+        console.error('Error fetching metrics:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+  }, [currentUser]);
 
   // Sample data for the chart
   const chartData = [
@@ -28,39 +52,39 @@ const Dashboard = () => {
     { name: '80k', value: 55 }
   ];
 
-  const metrics = [
+  const metricsCards = metrics ? [
     {
       title: 'Total User',
-      value: '40,689',
+      value: metrics.totalUsers.toLocaleString(),
       icon: '/assets/users.svg',
       bgColor: 'bg-blue-100',
       iconColor: 'text-blue-500'
     },
     {
       title: 'Subscriptions',
-      value: '10293',
+      value: metrics.totalSubscriptions.toLocaleString(),
       icon: '/assets/subscriptions.svg',
       bgColor: 'bg-yellow-100',
       iconColor: 'text-yellow-500'
     },
     {
       title: 'Total Games',
-      value: '20',
+      value: metrics.totalGames.toLocaleString(),
       icon: '/assets/games.svg',
       bgColor: 'bg-green-100',
       iconColor: 'text-green-500'
     },
     {
       title: 'Total Programs',
-      value: '45',
+      value: metrics.totalPrograms.toLocaleString(),
       icon: '/assets/programs.svg',
       bgColor: 'bg-orange-100',
       iconColor: 'text-orange-500'
     }
-  ];
+  ] : [];
 
   return (
-    <div className="min-h-screen bg-[#F5F6FA] flex">
+    <div className="min-h-screen bg-[#F5F6FA] flex overflow-hidden">
       {/* Sidebar */}
       <Sidebar 
         activeNav={activeNav} 
@@ -70,18 +94,29 @@ const Dashboard = () => {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col md:ml-0">
+      <div className="flex-1 flex flex-col md:ml-0 relative">
         {/* Header */}
-        <TopBar />
+        <div className="relative z-30">
+          <TopBar />
+        </div>
 
         {/* Dashboard Content */}
-        <main className="flex-1 p-8 md:p-8 pt-16 md:pt-8">
+        <main className="flex-1 p-8 md:p-8 pt-4 md:pt-8 overflow-auto">
           <h1 className='text-3xl sm:text-4xl  font-nunitoSansBold font-bold mb-4 text-primaryBlack'>Dashboard</h1>
-          {/* Metrics Cards */}
-          <MetricsCard metrics={metrics} />
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <>
+              {/* Metrics Cards */}
+              <MetricsCard metrics={metricsCards} />
 
-          {/* Chart Section */}
-          <DashboardGraph chartData={chartData} />
+              {/* Chart Section */}
+              <DashboardGraph chartData={chartData} />
+            </>
+          )}
         </main>
       </div>
     </div>

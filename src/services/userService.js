@@ -202,4 +202,53 @@ export const deleteUserData = async (userId) => {
     console.error('Error deleting user data from Firestore:', error);
     throw error;
   }
+};
+
+// Get dashboard metrics
+export const getDashboardMetrics = async (currentAdminId) => {
+  try {
+    console.log('Fetching dashboard metrics...');
+    
+    // Count total users including admins but exclude current admin
+    const usersQuery = query(collection(db, 'users'));
+    const usersSnapshot = await getDocs(usersQuery);
+    const totalUsers = usersSnapshot.docs.filter(doc => doc.id !== currentAdminId).length;
+    
+    // Count users from users collection only (non-admin users)
+    const regularUsersQuery = query(
+      collection(db, 'users'),
+      where('role', '!=', 'admin')
+    );
+    const regularUsersSnapshot = await getDocs(regularUsersQuery);
+    const regularUsersCount = regularUsersSnapshot.size;
+    
+    // Count games
+    const gamesQuery = query(collection(db, 'games'));
+    const gamesSnapshot = await getDocs(gamesQuery);
+    const totalGames = gamesSnapshot.size;
+    
+    // Count programs
+    const programsQuery = query(collection(db, 'programs'));
+    const programsSnapshot = await getDocs(programsQuery);
+    const totalPrograms = programsSnapshot.size;
+    
+    // Count subscriptions
+    const subscriptionsQuery = query(collection(db, 'subscriptions'));
+    const subscriptionsSnapshot = await getDocs(subscriptionsQuery);
+    const totalSubscriptions = subscriptionsSnapshot.size;
+    
+    const metrics = {
+      totalUsers,
+      regularUsers: regularUsersCount,
+      totalGames,
+      totalPrograms,
+      totalSubscriptions
+    };
+    
+    console.log('Dashboard metrics fetched:', metrics);
+    return metrics;
+  } catch (error) {
+    console.error('Error fetching dashboard metrics:', error);
+    throw error;
+  }
 }; 
